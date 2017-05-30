@@ -15,6 +15,7 @@ class Query{
 
 	private $message = "";
 	private $result = [];
+	private $socket;
 
 	/**
 	 * [__construct description]
@@ -79,17 +80,37 @@ class Query{
 		return $this->port;
 	}
 
-	public function UT3QueryServer(string $host, int $port) : array{
-		$sock = @fsockopen("udp://" . $host, $port);
-		if(!$sock){
+	/**
+	 * [getConnection socketを返します。]
+	 * @return [type] [description]
+	 */
+	public function getConnection(){
+		return $this->socket;
+	}
+
+	/**
+	 * [isConnecting description]
+	 * @return boolean [接続されているかを返します]
+	 */
+	public function isConnecting() : bool{
+		return $this->socket !== false;
+	}
+
+	/**
+	 * [sendQuery Queryを送信します。]
+	 * @return [type]       [description]
+	 */
+	public function sendQuery(){
+		$this->socket = @fsockopen("udp://" . $this->getHost(), $this->getPort());
+		if(!$this->socket){
 			throw new QueryException("Host or Port is Invalid!!");
 		}
-		@socket_set_timeout($sock, 0, PHP_INT_MAX);
-		if(!@fwrite($sock, "\xFE\xFD\x09\x10\x20\x30\x40\xFF\xFF\xFF\x01")){
+		@socket_set_timeout($this->socket, 0, PHP_INT_MAX);
+		if(!@fwrite($this->socket, "\xFE\xFD\x09\x10\x20\x30\x40\xFF\xFF\xFF\x01")){
 			throw new QueryException("fwrite error.");
 			return "fwrite error.";
 		}
-		$challenge = fread($sock, 1400);
+		$challenge = fread($this->socket, 1400);
 		if(!$challenge){
 			throw new QueryException("fread error.");
 		}
@@ -101,22 +122,23 @@ class Query{
 			($challenge >> 8),
 			($challenge >> 0)
 		);
-		if(!@fwrite($sock, $query)){
+		if(!@fwrite($this->socket, $query)){
 			throw new QueryException("fwrite error.");
 		}
 		$response = [];
 		for($i = 0; $i < 2; $i++){
-			$response[] = @fread($sock, 2048);
+			$response[] = @fread($this->socket, 2048);
 		}
 
 		$response = explode("\0", substr(implode($response), 16));
+
 		array_pop($response);
 		array_pop($response);
 		array_pop($response);
 		array_pop($response);
 		array_pop($response);
 
-		$return = [];
+		$this->result = [];
 		$type = 0;
 		foreach($response as $key){
 			if($type == 0){
@@ -124,22 +146,10 @@ class Query{
 			}
 
 			if($type == 1){
-				$return[$val] = $key;
+				$this->result[$val] = $key;
 			}
 			$type == 0 ? $type = 1 : $type = 0;
 		}
-
-		return $return;
-	}
-
-	/**
-	 * [sendQuery Queryを送信します。]
-	 * @param  [type] $host [description]
-	 * @param  [type] $port [description]
-	 * @return [type]       [description]
-	 */
-	public function sendQuery(string $host, int $port){
-		$this->result = $this->UT3QueryServer($host, $port);
-		$this->message = json_encode($result, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+		$this->message = json_encode($this->getResult(), JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
 	}
 }
