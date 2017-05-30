@@ -16,7 +16,7 @@ $port = 19132;
 
 $query = new Query($host, $port);
 $query->sendQuery();
-echo "<pre>".$query->getMesage()."</pre>";
+echo "<pre>".$query->getMessage()."</pre>";
 ```
 詳しい使い方は、このライブラリに同梱されている  
 example.phpを読んでみてください！
