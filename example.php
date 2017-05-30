@@ -1,6 +1,3 @@
-#PEQueries
-
-`
 <?php
 
 include_once "Query.php";
@@ -16,4 +13,3 @@ $query = new Query($host, $port);
 $query->sendQuery();
 
 echo "<pre".$query->getMesage()."</pre>";
-`
