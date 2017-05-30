@@ -9,7 +9,7 @@ Overview
 光栄です。
 
 ## Usage
-
+```php
     <?php
     include_once "Query.php";
 
@@ -19,7 +19,7 @@ Overview
     $query = new Query($host, $port);
     $query->sendQuery();
     echo "<pre".$query->getMesage()."</pre>";
-
+```
 詳しい使い方は、このライブラリに同梱されている
 example.phpを読んでみてください！
 
