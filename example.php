@@ -12,4 +12,4 @@ $query = new Query($host, $port);
 
 $query->sendQuery();
 
-echo "<pre".$query->getMesage()."</pre>";
+echo "<pre".$query->getMessage()."</pre>";
