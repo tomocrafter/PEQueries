@@ -1,8 +1,6 @@
 PEQueries
 ====
 
-Overview
-
 ## Description
 これは、簡単にPocketMine-MPのQueryを誰でも扱えるようにするライブラリです。  
 商用利用可能ですが、ご使用いただく際はサイトなどに  
@@ -24,5 +22,5 @@ echo "<pre>".$query->getMesage()."</pre>";
 example.phpを読んでみてください！
 
 ## Author
-[@tomocrafter](https://twitter.com/tomocrafter)
+[@tomocrafter](https://twitter.com/tomocrafter)  
 [tomocrafter](https://github.com/tomocrafter)
