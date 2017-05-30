@@ -10,15 +10,15 @@ Overview
 
 ## Usage
 ```php
-    <?php
-    include_once "Query.php";
+<?php
+include_once "Query.php";
 
-    $host = "ctf.nekocafe.pw";
-    $port = 19132;
+$host = "ctf.nekocafe.pw";
+$port = 19132;
 
-    $query = new Query($host, $port);
-    $query->sendQuery();
-    echo "<pre".$query->getMesage()."</pre>";
+$query = new Query($host, $port);
+$query->sendQuery();
+echo "<pre".$query->getMesage()."</pre>";
 ```
 詳しい使い方は、このライブラリに同梱されている
 example.phpを読んでみてください！
