@@ -5,7 +5,9 @@ Overview
 
 ## Description
 これは、簡単にPocketMine-MPのQueryを誰でも扱えるようにするライブラリです。
+
 商用利用可能ですが、ご使用いただく際はサイトなどに私の名前やこのライブラリの名前を掲載させていただければ
+
 光栄です。
 
 ## Usage
@@ -21,6 +23,7 @@ $query->sendQuery();
 echo "<pre>".$query->getMesage()."</pre>";
 ```
 詳しい使い方は、このライブラリに同梱されている
+
 example.phpを読んでみてください！
 
 ## Author
