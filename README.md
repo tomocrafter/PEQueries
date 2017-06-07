@@ -1,4 +1,4 @@
-PEQueries
+﻿PEQueries
 ====
 
 ## Description
@@ -8,28 +8,8 @@ PEQueries
 06/07 テスト完了しました！
 
 ## Usage
-```php
-<?php
-
-include_once "Query.php";
-
-$host = "ctf.nekocafe.pw";
-$port = 19132;
-
-$query = new Query($host, $port);
-
-// $query->setHost("play.lbsg.net");
-// $query->setPort(19132);
-
-try{
-	$result = $query->sendQuery();
-	echo "<pre>".print_r($result, true)."</pre>";
-} catch (QueryException $e){
-	echo $e->getMessage();
-}
-```
-詳しい使い方は、このライブラリに同梱されている
-example.phpを読んでみてください！
+使い方は、このライブラリに同梱されている  
+example.php を読んでみてください！
 
 ## Author
 [@tomocrafter](https://twitter.com/tomocrafter)
