@@ -11,8 +11,8 @@ $query = new Query($host, $port);
 // $query->setPort(19132);
 
 try{
-	$query->sendQuery();
-	echo "<pre>".$query->getMesage()."</pre>";
+	$result = $query->sendQuery();
+	echo "<pre>".print_r($result, true)."</pre>";
 } catch (QueryException $e){
 	echo $e->getMessage();
 }

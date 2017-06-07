@@ -11,8 +11,6 @@
 
 class Query{
 
-	private $message = "";
-	private $result = [];
 	private $socket;
 
 	/**
@@ -21,26 +19,8 @@ class Query{
 	 * @param int    $port [description]
 	 */
 	public function __construct(string $host, int $port){
-		$host = gethostbyname($host);
 		$this->host = $host;
 		$this->port = $port;
-	}
-
-	/**
-	 * [getMessage 現在のメッセージを返します？]
-	 * @return string [現在のメッセージ]
-	 */
-	public function getMessage() : string{
-		return $this->message;
-	}
-
-	/**
-	 * [getResult Queryの結果を返却します。]
-	 * @return array [Queryの結果]
-	 */
-	public function getResult() : array{
-		if(empty($this->result)) throw new QueryException("You have not submitted a query yet.");
-		return $this->result;
 	}
 
 	/**
@@ -99,15 +79,14 @@ class Query{
 	 * [sendQuery Queryを送信します。]
 	 * @return [type]       [description]
 	 */
-	public function sendQuery(){
+	public function sendQuery() : Array{
 		$this->socket = @fsockopen("udp://" . $this->getHost(), $this->getPort());
 		if(!$this->socket){
 			throw new QueryException("Host or Port is Invalid!!");
 		}
-		@socket_set_timeout($this->socket, 0, PHP_INT_MAX);
+		@socket_set_timeout($this->socket, 5);//5秒
 		if(!@fwrite($this->socket, "\xFE\xFD\x09\x10\x20\x30\x40\xFF\xFF\xFF\x01")){
 			throw new QueryException("fwrite error.");
-			return "fwrite error.";
 		}
 		$challenge = fread($this->socket, 1400);
 		if(!$challenge){
@@ -137,7 +116,7 @@ class Query{
 		array_pop($response);
 		array_pop($response);
 
-		$this->result = [];
+		$result = [];
 		$type = 0;
 		foreach($response as $key){
 			if($type == 0){
@@ -145,11 +124,11 @@ class Query{
 			}
 
 			if($type == 1){
-				$this->result[$val] = $key;
+				$result[$val] = $key;
 			}
 			$type == 0 ? $type = 1 : $type = 0;
 		}
-		$this->message = json_encode($this->getResult(), JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+		return $result;
 	}
 }
 
