@@ -21,6 +21,7 @@ class Query{
 	 * @param int    $port [description]
 	 */
 	public function __construct(string $host, int $port){
+		$host = gethostbyname($host);
 		$this->host = $host;
 		$this->port = $port;
 	}

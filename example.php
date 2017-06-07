@@ -10,6 +10,9 @@ $query = new Query($host, $port);
 // $query->setHost("play.lbsg.net");
 // $query->setPort(19132);
 
-$query->sendQuery();
-
-echo "<pre>".$query->getMesage()."</pre>";
+try{
+	$query->sendQuery();
+	echo "<pre>".$query->getMesage()."</pre>";
+} catch (QueryException $e){
+	echo $e->getMessage();
+}
