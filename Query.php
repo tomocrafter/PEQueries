@@ -9,8 +9,6 @@
  * @version 1.0.0 [OpenSource]
  */
 
-include "QueryException.php";
-
 class Query{
 
 	private $message = "";
@@ -153,3 +151,5 @@ class Query{
 		$this->message = json_encode($this->getResult(), JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
 	}
 }
+
+class QueryException extends Exception {}
