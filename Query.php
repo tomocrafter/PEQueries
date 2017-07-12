@@ -71,7 +71,7 @@ class Query{
 	 * [isConnecting description]
 	 * @return boolean [接続されているかを返します]
 	 */
-	public function isConnecting() : bool{
+	public function isConnecting(): bool{
 		return $this->socket !== false;
 	}
 
@@ -79,7 +79,7 @@ class Query{
 	 * [sendQuery Queryを送信します。]
 	 * @return [type]       [description]
 	 */
-	public function sendQuery() : Array{
+	public function sendQuery(): Array{
 		$this->socket = @fsockopen("udp://" . $this->getHost(), $this->getPort());
 		if(!$this->socket){
 			throw new QueryException("Host or Port is Invalid!!");
@@ -112,21 +112,52 @@ class Query{
 
 		array_pop($response);
 		array_pop($response);
-		array_pop($response);
-		array_pop($response);
-		array_pop($response);
 
 		$result = [];
-		$type = 0;
-		foreach($response as $key){
-			if($type == 0){
-				$val = $key;
+		$flag = false;
+		$playerflag = false;
+		foreach($response as $val){
+			if($val === "") continue;
+			if($val === json_decode('"\u0001"').'player_'){
+				$playerflag = true;
+				continue;
+			}elseif($playerflag && $val !== ""){
+				$result['players'][] = $val;
+				continue;
 			}
 
-			if($type == 1){
-				$result[$val] = $key;
+			if($flag === false){
+				$key = $val;
 			}
-			$type == 0 ? $type = 1 : $type = 0;
+			if($flag === true){
+				if($key === "version"){
+					$array = explode(",", $val);
+					if(count($array) === 0){
+						$result["version"] = ltrim($val, 'v');
+					}else{
+						foreach ($array as $key => $value) {
+							$result["versions"][] = ltrim($value, 'v');
+						}
+					}
+				}elseif($key === "whitelist"){
+					if($val === "off"){
+						$result["whitelist"] = false;
+					}else{
+						$result["whitelist"] = true;
+					}
+				}elseif($key === 'plugins'){
+					$engine = $result['server_engine'] ?? '';
+					$trimed = ltrim($val, $engine.': ');
+					$plugins = explode('; ', $trimed);
+					foreach ($plugins as $value) {
+						$array = explode(' ', $value);
+						$result['plugins'][$array[0]] = $array[1];
+					}
+				}else{
+					$result[$key] = $val;
+				}
+			}
+			$flag = !$flag;
 		}
 		return $result;
 	}
