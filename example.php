@@ -2,7 +2,7 @@
 
 include_once "Query.php";
 
-$host = "ctf.nekocafe.pw";
+$host = "moin.dip.jp";
 $port = 19132;
 
 $query = new Query($host, $port);
