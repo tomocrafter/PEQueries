@@ -6,12 +6,14 @@
  * 私の名前やこのライブラリの名前を載せていただけたら光栄です。
  *
  * @author tomotomo or tomocrafter <tomoppeko@gmail.com>
- * @version 1.0.0 [OpenSource]
+ * @version 1.1.0 [OpenSource]
  */
 
 class Query{
 
 	private $socket;
+	private $host;
+	private $port;
 
 	/**
 	 * [__construct description]
@@ -21,30 +23,49 @@ class Query{
 	public function __construct(string $host, int $port){
 		$this->host = $host;
 		$this->port = $port;
+
+		$this->socket = @fsockopen('udp://' . $this->host, $this->port);
+		if(!$this->socket){
+			throw new QueryException('Host or Port is Invalid!!');
+			$this->closeConnection();
+		}
+	}
+
+	public function connect(){
+		if($this->isConnecting()){
+			$this->closeConnection();
+		}
+		$this->socket = @fsockopen('udp://' . $this->host, $this->port);
+		if(!$this->socket){
+			throw new QueryException('Host or Port is Invalid!!');
+			$this->closeConnection();
+		}
 	}
 
 	/**
-	 * [setHost ホストを変更します。]
+	 * ホストを変更します。
 	 * @param string $host [変更するホスト]
-	 * @return this [このインスタンスを返します]
+	 * @return this [このインスタンス]
 	 */
 	public function setHost(string $host){
 		$this->host = $host;
+		$this->connect();
 		return $this;
 	}
 
 	/**
-	 * [setPort ポートを変更します。]
+	 * ポートを変更します。
 	 * @param int $port [変更するポート]
-	 * @return this [このインスタンスを返します]
+	 * @return this [このインスタンス]
 	 */
 	public function setPort(int $port){
 		$this->port = $port;
+		$this->connect();
 		return $this;
 	}
 
 	/**
-	 * [getHost 現在のホストを返します。]
+	 * 現在のホストを返します。
 	 * @return string [現在のホスト]
 	 */
 	public function getHost() : string{
@@ -52,7 +73,7 @@ class Query{
 	}
 
 	/**
-	 * [getPort 現在のポートを返します。]
+	 * 現在のポートを返します。
 	 * @return int [現在のポート]
 	 */
 	public function getPort() : int{
@@ -60,40 +81,49 @@ class Query{
 	}
 
 	/**
-	 * [getConnection socketを返します。]
+	 * socketを返します。
 	 * @return [type] [description]
 	 */
 	public function getConnection(){
-		return $this->socket;
+		return $this->socket;//接続されていなかったらnull
 	}
 
 	/**
-	 * [isConnecting description]
-	 * @return boolean [接続されているかを返します]
+	 * Alias of closeConnection
+	 */
+	public function stopConnect(){ $this->closeConnection(); }
+
+	/**
+	 * socketを閉じます。
+	 */
+	public function closeConnection(){
+		fclose($this->socket);
+		$this->socket = null;
+	}
+
+	/**
+	 * 接続されているかを返します。
+	 * @return boolean [接続されているか]
 	 */
 	public function isConnecting(): bool{
-		return $this->socket !== false;
+		return $this->socket !== false && is_resource($this->socket);
 	}
 
 	/**
-	 * [sendQuery Queryを送信します。]
+	 * Queryを送信します。
 	 * @return [type]       [description]
 	 */
 	public function sendQuery(): Array{
-		$this->socket = @fsockopen("udp://" . $this->getHost(), $this->getPort());
-		if(!$this->socket){
-			throw new QueryException("Host or Port is Invalid!!");
-		}
 		@socket_set_timeout($this->socket, 5);//5秒
 		if(!@fwrite($this->socket, "\xFE\xFD\x09\x10\x20\x30\x40\xFF\xFF\xFF\x01")){
-			throw new QueryException("fwrite error.");
+			throw new QueryException('Failed to write a command.');
 		}
 		$challenge = fread($this->socket, 1400);
 		if(!$challenge){
-			throw new QueryException("fread error.");
+			throw new QueryException('Could not read a response.');
 		}
 
-		$challenge = substr(preg_replace("/[^0-9\-]/si",  "",  $challenge), 1);
+		$challenge = substr(preg_replace('/[^0-9\-]/si',  '',  $challenge), 1);
 		$query = sprintf("\xFE\xFD\x00\x10\x20\x30\x40%c%c%c%c\xFF\xFF\xFF\x01",
 			($challenge >> 24),
 			($challenge >> 16),
@@ -101,7 +131,7 @@ class Query{
 			($challenge >> 0)
 		);
 		if(!@fwrite($this->socket, $query)){
-			throw new QueryException("fwrite error.");
+			throw new QueryException('Failed to write a command.');
 		}
 		$response = [];
 		for($i = 0; $i < 2; $i++){
@@ -130,20 +160,20 @@ class Query{
 				$key = $val;
 			}
 			if($flag === true){
-				if($key === "version"){
-					$array = explode(",", $val);
-					if(count($array) === 0){
-						$result["version"] = ltrim($val, 'v');
+				if($key === 'version'){
+					$array = explode(',', $val);
+					if(count($array) === 1){
+						$result['version'] = ltrim($val, 'v');
 					}else{
 						foreach ($array as $key => $value) {
-							$result["versions"][] = ltrim($value, 'v');
+							$result['versions'][] = ltrim($value, 'v');
 						}
 					}
-				}elseif($key === "whitelist"){
-					if($val === "off"){
-						$result["whitelist"] = false;
+				}elseif($key === 'whitelist'){
+					if($val === 'off'){
+						$result['whitelist'] = false;
 					}else{
-						$result["whitelist"] = true;
+						$result['whitelist'] = true;
 					}
 				}elseif($key === 'plugins'){
 					$engine = $result['server_engine'] ?? '';
