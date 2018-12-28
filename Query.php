@@ -144,22 +144,23 @@ class Query{
 		array_pop($response);
 
 		$result = [];
+		$startPlayer = json_decode('"\u0001"').'player_';
 		$flag = false;
 		$playerflag = false;
 		foreach($response as $val){
 			if($val === "") continue;
-			if($val === json_decode('"\u0001"').'player_'){
+			if($val === $startPlayer){
 				$playerflag = true;
 				continue;
-			}elseif($playerflag && $val !== ""){
+			}elseif($playerflag && $val !== ''){
 				$result['players'][] = $val;
 				continue;
 			}
 
-			if($flag === false){
+			if(!$flag){
 				$key = $val;
 			}
-			if($flag === true){
+			if($flag){
 				if($key === 'version'){
 					$array = explode(',', $val);
 					if(count($array) === 1){
