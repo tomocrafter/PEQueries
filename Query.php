@@ -6,7 +6,7 @@
  * 私の名前やこのライブラリの名前を載せていただけたら光栄です。
  *
  * @author tomotomo or tomocrafter
- * @version 1.1.0 [OpenSource]
+ * @version 1.1.1 [OpenSource]
  */
 
 class Query{
